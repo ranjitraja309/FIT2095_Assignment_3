@@ -55,6 +55,16 @@ app.post('/30628059/Ranjit/drivers/delete', (req, res) => {
     res.redirect('/30628059/Ranjit/drivers');
 });
 
+// List Packages Endpoint
+app.get('/30628059/Ranjit/packages', (req, res) => {
+    res.render('listpackages.html', { records : packagesDB }); // records here will be used later during the add driver post
+});
+
+// Add Packages GET req
+app.get('/30628059/Ranjit/packages/new', (req, res) => {
+    res.render('addpackage.html');
+});
+
 // Page not found Endpoint
 app.get('*', (req, res) => {
 	res.render('pagenoutfound.html');
