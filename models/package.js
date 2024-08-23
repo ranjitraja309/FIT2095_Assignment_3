@@ -9,13 +9,13 @@ class Package {
         this.isAllocated = isAllocated;
         this.driver_id = driver_id;
     }
-
+// Creates package ID according to requirements
     newPackageID() {
         const randomNumbers = Math.floor(Math.random() * 100).toString();
         const randomLetters = this.newRandomLetters(3);
         return `P${randomLetters}-RB-${randomNumbers}`
     };
-
+// Code for random letters (can choose length)
     newRandomLetters(length) {
         let result = '';
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVXYZ';
