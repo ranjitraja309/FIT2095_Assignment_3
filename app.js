@@ -80,7 +80,7 @@ app.get('/30628059/Ranjit/packages/delete', (req, res) => {
 // Delete Package POST req
 app.post('/30628059/Ranjit/packages/delete', (req, res) => {
     const packageID = req.body.package_id;
-    packagesDB = packagesDB.filter(package => package.package_id !== packageId);  
+    packagesDB = packagesDB.filter(package => package.package_id !== packageID);  
     res.redirect('/30628059/Ranjit/packages');
 });
 

@@ -8,11 +8,13 @@
     <table>
         <tr>
             <th>Package ID</th>
-            <th>Package Name</th>
-            <th>Package Department</th>
-            <th>Package License</th>
-            <th>Package Active?</th>
+            <th>Package Title</th>
+            <th>Package Weight</th>
+            <th>Package Destination</th>
+            <th>Package Description</th>
             <th>Package Created At</th>
+            <th>Package is Allocated?</th>
+            <th>Driver ID</th>
         </tr>
 
         <% for (let i=0; i < records.length; i++){ %>
@@ -21,19 +23,25 @@
                     <%=records[i].package_id %>
                 </td>
                 <td>
-                    <%=records[i].package_name %>
+                    <%=records[i].package_title %>
                 </td>
                 <td>
-                    <%=records[i].package_department %>
+                    <%=records[i].package_weight %>
                 </td>
                 <td>
-                    <%=records[i].package_license %>
+                    <%=records[i].package_destination %>
                 </td>
                 <td>
-                    <%=records[i].package_isActive %>
+                    <%=records[i].package_description %>
                 </td>
                 <td>
                     <%=records[i].package_createdAt.toLocaleString() %>
+                </td>
+                <td>
+                    <%=records[i].package_isAllocated %>
+                </td>
+                <td>
+                    <%=records[i].driver_id %>
                 </td>
             </tr>
             <% }%>
