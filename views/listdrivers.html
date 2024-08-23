@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <h1>List of Drivers</h1>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <th>Driver ID</th>
+            <th>Driver Name</th>
+            <th>Driver Department</th>
+            <th>Driver License</th>
+            <th>Driver Active?</th>
+            <th>Driver Created At</th>
+        </tr>
+
+        <% for (let i=0; i < records.length; i++){ %>
+            <tr>
+                <td>
+                    <%=records[i].driver_id %>
+                </td>
+                <td>
+                    <%=records[i].driver_name %>
+                </td>
+                <td>
+                    <%=records[i].driver_department %>
+                </td>
+                <td>
+                    <%=records[i].driver_license %>
+                </td>
+                <td>
+                    <%=records[i].driver_isActive %>
+                </td>
+                <td>
+                    <%=records[i].driver_createdAt.toLocaleString() %>
+                </td>
+            </tr>
+            <% }%>
+    </table>
+</body>
+
+</html>

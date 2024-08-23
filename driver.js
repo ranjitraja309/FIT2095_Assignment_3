@@ -23,3 +23,5 @@ class Driver {
         return result;
     }
 }; 
+
+module.exports = Driver; 

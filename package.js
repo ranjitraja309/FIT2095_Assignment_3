@@ -25,3 +25,5 @@ class Package {
         return result;
     };
 };
+
+module.exports = Package; 

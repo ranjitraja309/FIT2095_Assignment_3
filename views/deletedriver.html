@@ -1,0 +1,17 @@
+<html>
+<head>
+    <h1>Delete Driver</h1>
+</head>
+<body>
+    <h2>Select Driver to Delete</h2>
+    <form action="/30628059/Ranjit/drivers/delete" method="get">
+        <label for="driver_id">Driver ID:</label>
+        <select id="driver_id" name="driver_id" required>
+            <% records.forEach(driver => { %>
+                <option value="<%= driver.driver_id %>"><%= driver.driver_id %> - <%= driver.driver_name %></option>
+            <% }); %>
+        </select>
+        <button type="submit">Delete Driver</button>
+    </form>
+</body>
+</html>
