@@ -1,3 +1,4 @@
+//Represents a driver
 class Driver {
     constructor(driver_name, driver_department, driver_license, driver_isActive) {
         this.driver_id = this.newDriverID();

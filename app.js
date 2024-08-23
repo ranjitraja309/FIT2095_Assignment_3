@@ -3,7 +3,7 @@ const path = require('path');
 const app = express();
 const ejs = require('ejs');
 const Driver = require('./driver');
-const Package = require('./package');
+const Packages = require('./packages');
 
 const PORT = 8080;
 const VIEWS_FOLDER = path.join(__dirname, 'views');
@@ -67,7 +67,7 @@ app.get('/30628059/Ranjit/packages/new', (req, res) => {
 
 // Add Package POST req
 app.post('/30628059/Ranjit/packages/new', (req, res) => {
-    let newPackage = new Package(req.body.package_title, req.body.package_weight, req.body.package_destination, req.body.package_description, req.body.package_isAllocated, req.body.driver_id);
+    let newPackage = new Packages(req.body.packages_title, req.body.packages_weight, req.body.packages_destination, req.body.packages_description, req.body.packages_isAllocated, req.body.driver_id);
     packagesDB.push(newPackage);
     res.redirect('/30628059/Ranjit/packages')
 });
@@ -79,8 +79,8 @@ app.get('/30628059/Ranjit/packages/delete', (req, res) => {
 
 // Delete Package POST req
 app.post('/30628059/Ranjit/packages/delete', (req, res) => {
-    const packageID = req.body.package_id;
-    packagesDB = packagesDB.filter(package => package.package_id !== packageID);  
+    const packageID = req.body.packages_id;
+    packagesDB = packagesDB.filter(packages => packages.packages_id !== packageID);  
     res.redirect('/30628059/Ranjit/packages');
 });
 
