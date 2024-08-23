@@ -10,7 +10,7 @@ app.engine('html', ejs.renderFile);
 app.set('view engine', 'html'); 
 
 app.use(express.urlencoded({extended: true})); 
-app.use(express.static('public')); 
+app.use(express.static(path.join(__dirname, 'public'))); 
 
 const drivers = []; 
 const packages = []; 
@@ -19,3 +19,7 @@ app.listen(PORT, () => {
     console.log(`running http://localhost:${PORT}`);
 });
 
+// Home Page Endpoint
+app.get('/', (req, res) => {
+    res.render(path.join(VIEWS_FOLDER, 'index.html'));
+});
