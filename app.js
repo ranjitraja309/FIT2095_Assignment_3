@@ -60,9 +60,28 @@ app.get('/30628059/Ranjit/packages', (req, res) => {
     res.render('listpackages.html', { records : packagesDB }); // records here will be used later during the add driver post
 });
 
-// Add Packages GET req
+// Add Package GET req
 app.get('/30628059/Ranjit/packages/new', (req, res) => {
     res.render('addpackage.html');
+});
+
+// Add Package POST req
+app.post('/30628059/Ranjit/packages/new', (req, res) => {
+    let newPackage = new Package(req.body.package_title, req.body.package_weight, req.body.package_destination, req.body.package_description, req.body.package_isAllocated, req.body.driver_id);
+    packagesDB.push(newPackage);
+    res.redirect('/30628059/Ranjit/packages')
+});
+
+// Delete Package GET req
+app.get('/30628059/Ranjit/packages/delete', (req, res) => {
+    res.render('deletepackage.html', { records: packagesDB });
+});
+
+// Delete Package POST req
+app.post('/30628059/Ranjit/packages/delete', (req, res) => {
+    const packageID = req.body.package_id;
+    packagesDB = packagesDB.filter(package => package.package_id !== packageId);  
+    res.redirect('/30628059/Ranjit/packages');
 });
 
 // Page not found Endpoint

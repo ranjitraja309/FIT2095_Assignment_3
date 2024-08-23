@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <h1>List of Packages</h1>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <th>Package ID</th>
+            <th>Package Name</th>
+            <th>Package Department</th>
+            <th>Package License</th>
+            <th>Package Active?</th>
+            <th>Package Created At</th>
+        </tr>
+
+        <% for (let i=0; i < records.length; i++){ %>
+            <tr>
+                <td>
+                    <%=records[i].package_id %>
+                </td>
+                <td>
+                    <%=records[i].package_name %>
+                </td>
+                <td>
+                    <%=records[i].package_department %>
+                </td>
+                <td>
+                    <%=records[i].package_license %>
+                </td>
+                <td>
+                    <%=records[i].package_isActive %>
+                </td>
+                <td>
+                    <%=records[i].package_createdAt.toLocaleString() %>
+                </td>
+            </tr>
+            <% }%>
+    </table>
+</body>
+
+</html>

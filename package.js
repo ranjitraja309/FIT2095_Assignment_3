@@ -4,9 +4,9 @@ class Package {
         this.package_title = this.package_title;
         this.package_weight = this.package_weight;
         this.package_destination = this.package_destination;
-        this.description = description;
-        this.createdAt = new Date();
-        this.isAllocated = isAllocated;
+        this.package_description = description;
+        this.package_createdAt = new Date();
+        this.package_isAllocated = isAllocated;
         this.driver_id = driver_id;
     }
 // Creates package ID according to requirements
