@@ -1,5 +1,5 @@
 //Represents a package
-class Packages {
+class Package {
     constructor(packages_title, packages_weight, packages_destination, packages_description, packages_isAllocated, driver_id) {
         this.packages_id = this.newPackageID();
         this.packages_title = packages_title;
@@ -27,4 +27,4 @@ class Packages {
     };
 };
 
-module.exports = Packages; 
+module.exports = Package; 

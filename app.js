@@ -14,8 +14,8 @@ mongoose.connect(url)
     .then(() => console.log('Connected to MongoDB Successfully'))
     .catch(err => console.error('Cannot Connect to MongoDB Successfully:', err));
 
-const Driver = require('./models/Driver');
-const Package = require('./models/Package');
+const Driver = require('./models/driver');
+const Package = require('./models/package');
 const driverSchema = require('./models/driverSchema');
 const packageSchema = require('./models/packageSchema');
 
@@ -218,29 +218,98 @@ app.delete('/30628059/Ranjit/api/v1/drivers/delete/:_id', async (req, res) => {
     }
 });
 
+// RESTful API - Update license and department for driver
 app.put('/30628059/Ranjit/api/v1/drivers/update', async (req, res) => {
     try {
-        const { id, driver_license, driver_department } = req.body;
+        const { _id, driver_license, driver_department } = req.body;
 
-        if (!id || !driver_license || !driver_department) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        // Checks if all the required fields are completed
+        if (!_id || !driver_license || !driver_department) {
+            return res.status(400).json({ status: 'Missing required fields' });
         }
 
-        // Update the driver with the new license and department
-        const updatedDriver = await driverSchema.findByIdAndUpdate(
-            id,
-            { driver_license, driver_department },
-            { new: true, runValidators: true } // Options: return the updated document, and validate update
+        // Does the update
+        const result = await driverSchema.updateOne(
+            { _id: _id },
+            { $set: { driver_license, driver_department } }
         );
 
-        if (!updatedDriver) {
-            return res.status(404).json({ error: 'Driver not found' });
+        // Check if the ID matches ID from database
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ status: 'ID not found' });
         }
-
-        // Return the updated driver
-        res.json(updatedDriver);
+        res.json({ status: 'Driver updated successfully' });
     } catch (error) {
         console.error('Error updating driver:', error);
         res.status(500).json({ error: 'Cannot update driver' });
     }
 });
+
+// RESTful API - Add a new driver
+app.post('/30628059/Ranjit/api/v1/drivers/new', async (req, res) => {
+    try {
+        const { driver_name, driver_department, driver_license, driver_isActive } = req.body;
+
+        // To get driver ID, I create a new driver instance
+        const driverInstance = new Driver(driver_name, driver_department, driver_license, driver_isActive);
+
+        // Creating a new Driver instance
+        const newDriver = new driverSchema({
+            _id: new mongoose.Types.ObjectId(),
+            driver_id: driverInstance.driver_id,
+            driver_name,
+            driver_department,
+            driver_license,
+            driver_isActive
+        });
+
+        // Save the driver to the database
+        await newDriver.save();
+
+        // Respond with the newly created driver data
+        res.status(201).json({
+            id: newDriver._id,
+            driver_id: newDriver.driver_id
+        });
+    } catch (error) {
+        console.error('Error adding driver:', error);
+        res.status(500).json({ error: 'Cannot add new driver' });
+    }
+});
+
+
+// RESTful API - Add a new package
+app.post('/30628059/Ranjit/api/v1/packages/new', async (req, res) => {
+    try {
+        const { packages_title, packages_description, packages_destination, packages_weight, packages_createdAt, packages_isAllocated } = req.body;
+
+        // To get package ID, I create a new package instance
+        const packageInstance = new Package(packages_title, packages_weight, packages_destination, packages_description, packages_createdAt, packages_isAllocated);
+
+        // Create a new Package instance
+        const newPackage = new packageSchema({
+            _id: new mongoose.Types.ObjectId(),
+            packages_id: packageInstance.packages_id,
+            packages_title,
+            packages_weight,
+            packages_destination,
+            packages_description,
+            packages_createdAt,
+            packages_isAllocated
+        });
+
+        // Save the package to the database
+        await newPackage.save();
+
+        // Respond with the newly created package data
+        res.status(201).json({
+            id: newPackage._id,
+            package_id: newPackage.packages_id
+        });
+    } catch (error) {
+        console.error('Error adding package:', error);
+        res.status(500).json({ error: 'Cannot add new package' });
+    }
+});
+
+
