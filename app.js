@@ -2,8 +2,21 @@ const express = require('express'); //new instances to use later
 const path = require('path');
 const app = express();
 const ejs = require('ejs');
-const Driver = require('./driver');
-const Packages = require('./packages');
+
+// Added in mongoose instance
+const mongoose = require('mongoose');
+
+// URL for MongoDB Server
+const url = 'mongodb://127.0.0.1:27017/A2_DB';
+
+// Connecting to MongoDB client
+mongoose.connect(url)
+    .then(() => console.log('Connected to MongoDB Successfully'))
+    .catch(err => console.error('Cannot Connect to MongoDB Successfully:', err));
+
+const driverSchema = require('./driver');
+const packageSchema = require('./packages');
+
 
 const PORT = 8080;
 const VIEWS_FOLDER = path.join(__dirname, 'views');
@@ -16,69 +29,70 @@ app.set('view engine', 'html');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-let driversDB = [];
-let packagesDB = [];
-
 app.listen(PORT, () => {
-    console.log(`running http://localhost:${PORT}`);
+    console.log(`Running http://localhost:${PORT}`);
 });
 
-/**
- * Endpoint for Home Page
- * @param {Object} req - express req object
- * @param {Object} res - express res object
- */
-app.get('/', (req, res) => {
-    res.render('index.html');
+// Home page that now also displays the number of drivers and packages
+app.get('/', async (req, res) => {
+    try {
+        const driverCount = await driverSchema.countDocuments();
+        const packageCount = await packageSchema.countDocuments();
+
+        res.render('index.html', { driverCount, packageCount });
+    } catch (error) {
+        res.status(500).send('Cannot get data');
+    }
 });
 
-/**
- * Endpoint for List of Drivers.
- * @param {Object} req 
- * @param {Object} res 
- */
-
+// List drivers GET request
 app.get('/30628059/Ranjit/drivers', (req, res) => {
-    res.render('listdrivers.html', { records : driversDB }); // records here will be used later during the add driver post
+    res.render('listdrivers.html', { records: driversDB }); // records here will be used later during the add driver post
 });
-
-/**
- * Rendering the form to add a new driver
- * @param {Object} req 
- * @param {Object} res 
- */
 
 app.get('/30628059/Ranjit/drivers/new', (req, res) => {
     res.render('adddriver.html');
 });
 
-/**
- * Handles the submission of the new driver form and adds a new driver to the database.
- * @param {Object} req 
- * @param {Object} res  
- */
-
-app.post('/30628059/Ranjit/drivers/new', (req, res) => {
-    let newDriver = new Driver(req.body.driver_name, req.body.driver_department, req.body.driver_license, req.body.driver_driver_isActive);
-    driversDB.push(newDriver);
-    res.redirect('/30628059/Ranjit/drivers')
+// New add drivers POST request 
+app.post('/30628059/Ranjit/drivers/new', async (req, res) => {
+    try {
+        const newDriver = new driverSchema(req.body);
+        await newDriver.save();
+        res.redirect('/30628059/Ranjit/drivers');
+    } catch (error) {
+        res.status(500).send('Cannot add new driver');
+    }
 });
 
-// Delete Driver GET req
-app.get('/30628059/Ranjit/drivers/delete', (req, res) => {
-    res.render('deletedriver.html', { records: driversDB });
+// New delete drivers GET request
+app.get('/30628059/Ranjit/drivers/delete', async (req, res) => {
+    try {
+        const drivers = await driverSchema.find();
+        res.render('deletedriver.html', { records: drivers });
+    } catch (error) {
+        res.status(500).send('Cannot get drivers data');
+    }
 });
 
-// Delete Driver POST req
-app.post('/30628059/Ranjit/drivers/delete', (req, res) => {
-    const driverId = req.body.driver_id;
-    driversDB = driversDB.filter(driver => driver.driver_id !== driverId);  
-    res.redirect('/30628059/Ranjit/drivers');
+// New delete drivers POST request
+app.post('/30628059/Ranjit/drivers/delete', async (req, res) => {
+    try {
+        await driverSchema.findByIdAndDelete(req.body.driver_id);
+        res.redirect('/30628059/Ranjit/drivers');
+    } catch (error) {
+        res.status(500).send('Cannot delete driver');
+    }
 });
 
-// List Packages Endpoint
-app.get('/30628059/Ranjit/packages', (req, res) => {
-    res.render('listpackages.html', { records : packagesDB }); // records here will be used later during the add driver post
+// New List Packages GET request
+app.get('/30628059/Ranjit/packages', async (req, res) => {
+    try {
+        const packages = await packageSchema.find();
+        res.render('listpackages.html', { records: packages });
+    } catch (error) {
+        res.status(500).send('Cannot get packages data');
+    }
 });
 
 // Add Package GET req
@@ -86,26 +100,58 @@ app.get('/30628059/Ranjit/packages/new', (req, res) => {
     res.render('addpackage.html');
 });
 
-// Add Package POST req
-app.post('/30628059/Ranjit/packages/new', (req, res) => {
-    let newPackage = new Packages(req.body.packages_title, req.body.packages_weight, req.body.packages_destination, req.body.packages_description, req.body.packages_isAllocated, req.body.driver_id);
-    packagesDB.push(newPackage);
-    res.redirect('/30628059/Ranjit/packages')
+// New add packages POST request
+app.post('/30628059/Ranjit/packages/new', async (req, res) => {
+    try {
+        const newPackage = new packageSchema(req.body);
+        await newPackage.save();
+        res.redirect('/30628059/Ranjit/packages');
+    } catch (error) {
+        res.status(500).send('Cannot add new package');
+    }
 });
 
-// Delete Package GET req
-app.get('/30628059/Ranjit/packages/delete', (req, res) => {
-    res.render('deletepackage.html', { records: packagesDB });
+// New delete packages GET request
+app.get('/30628059/Ranjit/packages/delete', async (req, res) => {
+    try {
+        const packages = await packageSchema.find();
+        res.render('deletepackage.html', { records: packages });
+    } catch (error) {
+        res.status(500).send('Cannot delete package');
+    }
 });
 
-// Delete Package POST req
-app.post('/30628059/Ranjit/packages/delete', (req, res) => {
-    const packageID = req.body.packages_id;
-    packagesDB = packagesDB.filter(packages => packages.packages_id !== packageID);  
-    res.redirect('/30628059/Ranjit/packages');
+// New delete packages POST request
+app.post('/30628059/Ranjit/packages/delete', async (req, res) => {
+    try {
+        await packageSchema.findByIdAndDelete(req.body.packages_id);
+        res.redirect('/30628059/Ranjit/packages');
+    } catch (error) {
+        res.status(500).send('Cannot delete package');
+    }
+});
+
+// REST API - List packages in JSON
+app.get('/30628059/Ranjit/api/v1/packages', async (req, res) => {
+    try {
+        const packages = await packageSchema.find();
+        res.json(packages);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot get drivers data ' });
+    }
+});
+
+// REST API - List drivers in JSON
+app.get('/30628059/Ranjit/api/v1/drivers', async (req, res) => {
+    try {
+        const drivers = await driverSchema.find();
+        res.json(drivers);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot get packages data' });
+    }
 });
 
 // Page not found Endpoint
 app.get('*', (req, res) => {
-	res.render('pagenoutfound.html');
+    res.render('pagenoutfound.html');
 });
