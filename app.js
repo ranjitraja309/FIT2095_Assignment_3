@@ -8,9 +8,11 @@ const Packages = require('./packages');
 const PORT = 8080;
 const VIEWS_FOLDER = path.join(__dirname, 'views');
 
+// Setting ejs as engine for html files
 app.engine('html', ejs.renderFile);
 app.set('view engine', 'html');
 
+// Used to parse URLs (middleware)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -21,22 +23,41 @@ app.listen(PORT, () => {
     console.log(`running http://localhost:${PORT}`);
 });
 
-// Home Page Endpoint
+/**
+ * Endpoint for Home Page
+ * @param {Object} req - express req object
+ * @param {Object} res - express res object
+ */
 app.get('/', (req, res) => {
     res.render('index.html');
 });
 
-//List Drivers Endpoint
+/**
+ * Endpoint for List of Drivers.
+ * @param {Object} req 
+ * @param {Object} res 
+ */
+
 app.get('/30628059/Ranjit/drivers', (req, res) => {
     res.render('listdrivers.html', { records : driversDB }); // records here will be used later during the add driver post
 });
 
-// Add Driver GET req
+/**
+ * Rendering the form to add a new driver
+ * @param {Object} req 
+ * @param {Object} res 
+ */
+
 app.get('/30628059/Ranjit/drivers/new', (req, res) => {
     res.render('adddriver.html');
 });
 
-// Add Driver POST req
+/**
+ * Handles the submission of the new driver form and adds a new driver to the database.
+ * @param {Object} req 
+ * @param {Object} res  
+ */
+
 app.post('/30628059/Ranjit/drivers/new', (req, res) => {
     let newDriver = new Driver(req.body.driver_name, req.body.driver_department, req.body.driver_license, req.body.driver_driver_isActive);
     driversDB.push(newDriver);
