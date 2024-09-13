@@ -203,9 +203,10 @@ app.delete('/30628059/Ranjit/api/v1/drivers/delete/:_id', async (req, res) => {
         }
 
         // Delete the driver's assigned packages
-        const deletedPackages = await packageSchema.deleteMany({
-            _id: { $in: deletedDriver.assigned_packages }
-        });
+        await driverSchema.updateMany(
+            { assigned_packages: driverId },
+            { $pull: { assigned_packages: driverId } }
+        );
 
         // Return the desired JSON statements
         res.json({
@@ -245,39 +246,6 @@ app.put('/30628059/Ranjit/api/v1/drivers/update', async (req, res) => {
     }
 });
 
-// RESTful API - Add a new driver
-app.post('/30628059/Ranjit/api/v1/drivers/new', async (req, res) => {
-    try {
-        const { driver_name, driver_department, driver_license, driver_isActive } = req.body;
-
-        // To get driver ID, I create a new driver instance
-        const driverInstance = new Driver(driver_name, driver_department, driver_license, driver_isActive);
-
-        // Creating a new Driver instance
-        const newDriver = new driverSchema({
-            _id: new mongoose.Types.ObjectId(),
-            driver_id: driverInstance.driver_id,
-            driver_name,
-            driver_department,
-            driver_license,
-            driver_isActive
-        });
-
-        // Save the driver to the database
-        await newDriver.save();
-
-        // Respond with the newly created driver data
-        res.status(201).json({
-            id: newDriver._id,
-            driver_id: newDriver.driver_id
-        });
-    } catch (error) {
-        console.error('Error adding driver:', error);
-        res.status(500).json({ error: 'Cannot add new driver' });
-    }
-});
-
-
 // RESTful API - Add a new package
 app.post('/30628059/Ranjit/api/v1/packages/new', async (req, res) => {
     try {
@@ -312,4 +280,62 @@ app.post('/30628059/Ranjit/api/v1/packages/new', async (req, res) => {
     }
 });
 
+// RESTful API - Delete a package by their ID
+app.delete('/30628059/Ranjit/api/v1/packages/delete/:_id', async (req, res) => {
+    try {
+        const packageId = req.params._id; // Directly use the string ID
 
+        // Delete the package
+        const deletedPackage = await packageSchema.findByIdAndDelete(packageId);
+        if (!deletedPackage) {
+            return res.status(404).json({ error: 'Cannot find package' });
+        }
+
+        // Delete the package's assigned packages
+        await driverSchema.updateMany(
+            { assigned_packages: packageId },
+            { $pull: { assigned_packages: packageId } }
+        );
+
+        // Return the desired JSON statements
+        res.json({
+            acknowledged: true,
+            deletedCount: 1
+        });
+    } catch (error) {
+        console.error('Error deleting package:', error);
+        res.status(500).json({ error: 'Cannot delete package' });
+    }
+});
+
+// RESTful API - Update license and department for driver
+app.put('/30628059/Ranjit/api/v1/packages/update', async (req, res) => {
+    try {
+        const { _id, packages_destination } = req.body;
+
+        // Checks if all the required fields are completed
+        if (!_id || !packages_destination) {
+            return res.status(400).json({ status: 'Missing required fields' });
+        }
+
+        // Does the update
+        const result = await packageSchema.updateOne(
+            { _id: _id },
+            { $set: { packages_destination: packages_destination }}
+        );
+
+        // Check if the ID matches ID from database
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ status: 'ID not found' });
+        }
+        res.json({ status: 'Package updated successfully' });
+    } catch (error) {
+        console.error('Error updating package:', error);
+        res.status(500).json({ error: 'Cannot update package' });
+    }
+});
+
+// Page not found Endpoint
+app.get('*', (req, res) => {
+	res.render('pagenoutfound.html');
+});
