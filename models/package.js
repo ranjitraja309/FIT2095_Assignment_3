@@ -1,4 +1,4 @@
-//Represents a project
+//Represents a package
 class Packages {
     constructor(packages_title, packages_weight, packages_destination, packages_description, packages_isAllocated, driver_id) {
         this.packages_id = this.newPackageID();
