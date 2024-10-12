@@ -37,7 +37,7 @@ app.listen(PORT, () => {
 });
 
 // Home page that now also displays the number of drivers and packages
-app.get('/', async (req, res) => {
+/*app.get('/', async (req, res) => {
     try {
         const driverCount = await driverSchema.countDocuments();
         const packageCount = await packageSchema.countDocuments();
@@ -64,33 +64,67 @@ app.get('/30628059/Ranjit/drivers/new', (req, res) => {
 
 // New add drivers POST request 
 app.post('/30628059/Ranjit/drivers/new', async (req, res) => {
+    console.log('Received request to add new driver:', req.body);
     try {
-        const newDriver = new driverSchema(req.body);
-        await newDriver.save();
+        // Ensure you are using the correct class and schema
+        const driverInstance = new Driver(req.body.driver_name, req.body.driver_department, req.body.driver_license, req.body.driver_isActive);
+
+        // Create a new Mongoose Driver instance
+        const newDriver = new driverSchema({
+            _id: new mongoose.Types.ObjectId(),
+            driver_id: driverInstance.driver_id,
+            driver_name: driverInstance.driver_name,
+            driver_department: driverInstance.driver_department,
+            driver_license: driverInstance.driver_license,
+            driver_isActive: driverInstance.driver_isActive
+        });
+
+        // Save the new driver using Mongoose
+        const savedDriver = await newDriver.save();
+        console.log('Driver saved successfully:', savedDriver);
+
+        // Redirect to the list of drivers after successful addition
         res.redirect('/30628059/Ranjit/drivers');
     } catch (error) {
-        res.status(500).send('Cannot add new driver');
+        console.error('Error adding new driver:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 });
 
-// New delete drivers GET request
+/* Delete drivers GET request
 app.get('/30628059/Ranjit/drivers/delete', async (req, res) => {
     try {
-        const drivers = await driverSchema.find();
-        res.render('deletedriver.html', { records: drivers });
+      const drivers = await driverSchema.find();
+      res.render('deletedriver.html', { records: drivers });
     } catch (error) {
-        res.status(500).send('Cannot get drivers data');
+      res.status(500).send('Cannot get drivers data');
     }
-});
+  });
+
 
 // New delete drivers POST request
 app.post('/30628059/Ranjit/drivers/delete', async (req, res) => {
     try {
-        await driverSchema.findByIdAndDelete(req.body.driver_id);
-        res.redirect('/30628059/Ranjit/drivers');
+        const driverId = req.body.driver_id; 
+        const deletedDriver = await driverSchema.findOneAndDelete({ driver_id: driverId });
+        if (!deletedDriver) {
+            return res.status(404).json({ error: 'Driver not found' });
+        }
+        res.redirect('/30628059/Ranjit/drivers'); 
     } catch (error) {
-        res.status(500).send('Cannot delete driver');
+        console.error('Error deleting driver:', error);
+        res.status(500).json({ error: 'Cannot delete driver' });
     }
+});
+
+// Update Drivers GET request
+app.get('/30628059/Ranjit/drivers/update', async (req, res) => {
+  try {
+    const drivers = await driverSchema.find();
+    res.render('updatedriver.html', { drivers });
+  } catch (error) {
+    res.status(500).send('Cannot get drivers data');
+  }
 });
 
 // New List Packages GET request
@@ -138,7 +172,7 @@ app.post('/30628059/Ranjit/packages/delete', async (req, res) => {
         res.status(500).send('Cannot delete package');
     }
 });
-
+*/
 // RESTful API - List packages in JSON
 app.get('/30628059/Ranjit/api/v1/packages', async (req, res) => {
     try {
@@ -166,10 +200,10 @@ app.post('/30628059/Ranjit/api/v1/drivers/new', async (req, res) => {
         const { driver_name, driver_department, driver_license, driver_isActive } = req.body;
 
         // To get driver ID, I create a new driver instance
-        const driverInstance = new Driver(driver_name, driver_department, driver_license, driver_isActive);
+        const driver = new Driver(driver_name, driver_department, driver_license, driver_isActive);
 
         // Creating a new Driver instance
-        const newDriver = new driverSchema({
+        const newDriver = new driver({
             _id: new mongoose.Types.ObjectId(),
             driver_id: driverInstance.driver_id,
             driver_name,
@@ -280,31 +314,26 @@ app.post('/30628059/Ranjit/api/v1/packages/new', async (req, res) => {
     }
 });
 
-// RESTful API - Delete a package by their ID
-app.delete('/30628059/Ranjit/api/v1/packages/delete/:_id', async (req, res) => {
+// GET request to show delete driver page
+app.get('/30628059/Ranjit/drivers/api/v1/delete', async (req, res) => {
     try {
-        const packageId = req.params._id; // Directly use the string ID
-
-        // Delete the package
-        const deletedPackage = await packageSchema.findByIdAndDelete(packageId);
-        if (!deletedPackage) {
-            return res.status(404).json({ error: 'Cannot find package' });
-        }
-
-        // Delete the package's assigned packages
-        await driverSchema.updateMany(
-            { assigned_packages: packageId },
-            { $pull: { assigned_packages: packageId } }
-        );
-
-        // Return the desired JSON statements
-        res.json({
-            acknowledged: true,
-            deletedCount: 1
-        });
+        const drivers = await driverSchema.find();
+        res.render('deletedriver.html', { drivers: drivers });
     } catch (error) {
-        console.error('Error deleting package:', error);
-        res.status(500).json({ error: 'Cannot delete package' });
+        console.error('Error fetching drivers:', error);
+        res.status(500).send('Error fetching drivers');
+    }
+});
+
+// POST request to delete a driver
+app.post('/30628059/Ranjit/drivers//api/v1/delete', async (req, res) => {
+    try {
+        const driverId = req.body.driver_id;
+        await driverSchema.findByIdAndDelete(driverId);
+        res.redirect('/30628059/Ranjit/drivers');
+    } catch (error) {
+        console.error('Error deleting driver:', error);
+        res.status(500).send('Error deleting driver');
     }
 });
 
@@ -335,7 +364,6 @@ app.put('/30628059/Ranjit/api/v1/packages/update', async (req, res) => {
     }
 });
 
-// Page not found Endpoint
 app.get('*', (req, res) => {
-	res.render('pagenoutfound.html');
-});
+    res.sendFile(path.join(__dirname, 'views', 'pagenotfound.html'));
+  });
